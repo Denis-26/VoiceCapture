@@ -11,4 +11,4 @@ class Fft:
         samples = sig.shape[0]
 
         data_fft = fft(sig)
-        return abs(data_fft), fftfreq(samples, 1 / rate)
+        return abs(data_fft), fftfreq(samples, 1 / rate), sig
