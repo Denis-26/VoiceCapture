@@ -1,28 +1,31 @@
+import time
+
 import numpy as np
+import pyaudio
+
 from AudioCapture import AudioCapture
 from Fft import Fft
 from OSCClient import OSCClient
 import matplotlib.pyplot as plt
-from time import sleep
+
+
+class SendToWekinator:
+    def __init__(self):
+        self.client = OSCClient("localhost", 6448)
+        self.audio_capture = AudioCapture(self.stream_callback)
+
+    def run(self):
+        self.audio_capture.record(10)
+
+    def stream_callback(self, in_data, frame_count, time_info, flag):
+        audio_data = np.frombuffer(in_data, dtype=np.float32)
+        self.client.send_message(data=(float(max(audio_data)), float(min(audio_data))))
+        return audio_data, pyaudio.paContinue
 
 
 def main():
-    audio_capture = AudioCapture()
-    fft = Fft()
-    audio_capture.record(2)
-    audio_capture.save_audio()
-    audio_capture.clear()
-
-    (fft_abs, freq_s, sig) = fft.extract()
-
-    cut_sig = list(filter(lambda x: x > 1000 or x < -1000, sig[20000:]))
-
-    plt.plot(cut_sig)
-    plt.show()
-
-    client = OSCClient("localhost", 6448)
-    for (k, v) in enumerate(cut_sig):
-        client.send_message(data=(k, float(v)))
+    send_to_wekinator = SendToWekinator()
+    send_to_wekinator.run()
 
 
 if __name__ == '__main__':

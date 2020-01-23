@@ -11,5 +11,4 @@ class OSCClient:
         self.client = udp_client.SimpleUDPClient(args.ip, args.port)
 
     def send_message(self, address="/wek/inputs", data=("test")):
-        print(data)
         self.client.send_message(address, data)

@@ -1,9 +1,13 @@
+import time
+from time import sleep
+
+import numpy as np
 import pyaudio
 import wave
 
 
 class AudioCapture:
-    def __init__(self, chunk=1024, width=2, channels=1, rate=44100, pa_format=pyaudio.paInt16):
+    def __init__(self, stream_callback, chunk=1024, width=2, channels=1, rate=44100, pa_format=pyaudio.paFloat32):
         self.chunk = chunk
         self.width = width
         self.channels = channels
@@ -12,22 +16,30 @@ class AudioCapture:
         self.frames = []
         self.audio = pyaudio.PyAudio()
         self.stream = self.audio.open(
-            format=self.audio.get_format_from_width(width),
+            format=pa_format,
             channels=channels,
             rate=rate,
             input=True,
             output=True,
-            frames_per_buffer=chunk)
+            stream_callback=stream_callback)
 
     def record(self, secs):
         print("* START recording {} secs".format(secs))
-        for i in range(0, int(self.rate / self.chunk * secs)):
-            data = self.stream.read(self.chunk)
-            self.frames.append(data)
-        self.stream.stop_stream()
-        self.stream.close()
+        self.__run_loop(secs)
         self.audio.terminate()
         print("* STOP recording")
+
+    def __run_loop(self, secs):
+        self.stream.start_stream()
+        while self.stream.is_active():
+            command = input("Write stop to stop: ")
+            if command == "stop":
+                self.stream.stop_stream()
+        self.stream.close()
+
+    def __get_stream_data(self):
+        data = self.stream.read(self.chunk)
+        return data, np.fromstring(data, dtype=np.float32)
 
     def save_audio(self, file_name="file.wav"):
         wave_file = wave.open(file_name, 'wb')
