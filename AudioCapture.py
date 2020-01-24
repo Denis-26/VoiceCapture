@@ -22,7 +22,7 @@ class AudioCapture:
             channels=channels,
             rate=rate,
             input=True,
-            output=True,
+            output=False,
             stream_callback=stream_callback)
 
     def record(self, secs):
@@ -36,8 +36,9 @@ class AudioCapture:
     def __run_loop(self, secs):
         self.stream.start_stream()
         while self.stream.is_active():
-            sleep(secs)
-            self.stream.stop_stream()
+            a = input("Write stop: ")
+            if a == "stop":
+                self.stream.stop_stream()
         self.stream.close()
 
     def __get_stream_data(self):

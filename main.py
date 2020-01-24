@@ -16,10 +16,10 @@ class SendToWekinator:
     def __init__(self):
         self.client = OSCClient("localhost", 6448)
         self.audio_capture = AudioCapture(self.stream_callback)
+        self.data = []
 
     def run(self):
-        self.audio_capture.record(10)
-        self.client.send_message(data=(float(0), float(0)))
+        self.audio_capture.record(5)
 
     def stream_callback(self, in_data, frame_count, time_info, flag):
         audio_data = np.frombuffer(in_data, dtype=np.float32)
