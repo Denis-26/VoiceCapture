@@ -5,11 +5,7 @@ import numpy as np
 import pyaudio
 
 from AudioCapture import AudioCapture
-from Fft import Fft
 from OSCClient import OSCClient
-import librosa
-import soundfile as sf
-import matplotlib.pyplot as plt
 
 
 class SendToWekinator:
@@ -23,7 +19,11 @@ class SendToWekinator:
 
     def stream_callback(self, in_data, frame_count, time_info, flag):
         audio_data = np.frombuffer(in_data, dtype=np.float32)
-        self.client.send_message(data=(float(max(audio_data)), float(min(audio_data))))
+        float_data = list(map(lambda x: float(x), audio_data))
+        float_data = float_data[:500]
+        float_data = float_data[400:]
+        # print(len(float_data))
+        self.client.send_message(data=float_data)
         return audio_data, pyaudio.paContinue
 
 
